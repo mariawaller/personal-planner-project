@@ -1,1 +1,22 @@
-<h3>the super cool and awesome app</h3>
+<!-- Navbar for site navigation -->
+<nav class="navbar navbar-expand-lg bg-body-tertiary">
+  <div class="container-fluid">
+    <a class="navbar-brand" routerLink="">Personal Planner</a>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link" routerLink="">Dashboard</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="groups">Groups</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="login">Login</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- The routing placeholder thing -->
+<router-outlet></router-outlet>
