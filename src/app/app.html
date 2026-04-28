@@ -18,5 +18,5 @@
   </div>
 </nav>
 
-<!-- The routing placeholder thing -->
-<router-outlet></router-outlet>
+<!-- The routing placeholder thing (routerOutletData can be accessed by the other components, it'll be how they know what the current user is) -->
+<router-outlet [routerOutletData]="currentUser()"></router-outlet>

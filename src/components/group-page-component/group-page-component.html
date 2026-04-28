@@ -1,1 +1,32 @@
-<p>group-page-component works!</p>
+<div class="container-fluid my-2">
+    <div class="row">
+        <!-- Group list -->
+        <div class="col-6">
+            <div class="card">
+                <div class="card-body">
+                    <h3>Groups</h3>
+                    @for(group of activeGroups(); track $index) {
+                        <p>{{ group.name }}</p>
+                    } @empty {
+                        <p>No groups found!</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Selected group details -->
+        <div class="col-6">
+            <div class="card">
+                <div class="card-body">
+                    <h3>Details</h3>
+                    @if(selectedGroup() == null) {
+                        <p>Select a group to show its details over here</p>
+                    } @else {
+                        <p>group details</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
