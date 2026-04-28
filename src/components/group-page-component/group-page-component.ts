@@ -11,6 +11,7 @@ import { User } from '../../app/models/user';
   styleUrl: './group-page-component.css',
 })
 export class GroupPageComponent {
+  // This thing is accessing the binding to routerOutletData in app.html
   currentUser = inject(ROUTER_OUTLET_DATA) as Signal<User | null>;
 
   activeGroups = signal<Group[]>([]);
