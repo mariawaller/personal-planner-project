@@ -1,0 +1,23 @@
+<div class="dashboard">
+
+  <div class="header">Next 7 Days</div>
+
+  <div *ngFor="let day of days" class="row-item">
+
+    <div class="date">
+      {{ day | date:'EEE, MMM d' }}
+    </div>
+
+    <div class="content" *ngIf="getEvents(day).length; else none">
+      <div *ngFor="let e of getEvents(day)">
+        {{ e.title }}
+      </div>
+    </div>
+
+    <ng-template #none>
+      <div class="content no-events">NO EVENTS</div>
+    </ng-template>
+
+  </div>
+
+</div>

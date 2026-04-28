@@ -1,0 +1,39 @@
+.dashboard {
+  border: 2px solid black;
+  height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* header */
+.header {
+  font-weight: bold;
+  padding: 10px;
+  border-bottom: 2px solid black;
+  background: #f0f0f0;
+}
+
+/* each row */
+.row-item {
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid black;
+  padding: 10px;
+  min-height: 80px;
+}
+
+/* date label */
+.date {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+/* events */
+.content {
+  font-size: 14px;
+}
+
+/* no events style */
+.no-events {
+  color: gray;
+}

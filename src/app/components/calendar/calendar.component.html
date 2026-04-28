@@ -1,0 +1,50 @@
+<div class="app-container">
+
+  <!-- LEFT -->
+  <div class="sidebar">
+    <h3>Filters</h3>
+    <p>Groups</p>
+    <p>Tags</p>
+  </div>
+
+  <!-- CENTER -->
+  <div class="main">
+    <h1>Planner</h1>
+
+    <div class="calendar">
+
+  <div class="header">
+    <button (click)="prevMonth()">←</button>
+    <h2>{{ currentDate | date:'MMMM yyyy' }}</h2>
+    <button (click)="nextMonth()">→</button>
+</div>
+
+      <div class="weekdays">
+        <div *ngFor="let d of ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']">
+          {{ d }}
+        </div>
+      </div>
+
+      <div class="grid">
+        <div
+          *ngFor="let day of days"
+          class="cell"
+          [class.other]="!isCurrentMonth(day)"
+          [class.today]="isToday(day)"
+          (click)="onDayClick(day)"
+        >
+      {{ day.getDate() }}
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="details">
+    <h3>Selected Day</h3>
+    <p>No event selected</p>
+    <button>+ Add Event</button>
+  </div>
+
+</div>

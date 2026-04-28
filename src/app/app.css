@@ -1,0 +1,19 @@
+.app-container {
+  display: grid;
+  grid-template-columns: 220px 1fr 280px;
+  height: 100vh;
+}
+
+.sidebar {
+  border-right: 1px solid #ddd;
+  padding: 20px;
+}
+
+.main {
+  padding: 40px;
+}
+
+.details {
+  border-left: 1px solid #ddd;
+  padding: 20px;
+}
