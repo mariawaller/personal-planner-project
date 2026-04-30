@@ -19,9 +19,9 @@
         </button>
       </mat-form-field>
 
-      <mat-error *ngIf="errorMessage">
-        {{ errorMessage }}
-      </mat-error>
+      @if (errorMessage) {
+        <mat-error>{{ errorMessage }}</mat-error>
+      }
     </mat-card-content>
 
     <mat-card-actions>
@@ -32,8 +32,11 @@
         (click)="onLogin()"
         [disabled]="loading"
       >
-        <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
-        <span *ngIf="!loading">Sign in</span>
+        @if (loading) {
+          <mat-spinner diameter="20"></mat-spinner>
+        } @else {
+          <span>Sign in</span>
+        }
       </button>
     </mat-card-actions>
 
