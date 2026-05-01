@@ -4,12 +4,12 @@
         <div class="col-6">
             <div class="card">
                 <div class="card-body">
-                    <button class="btn btn-primary" style="float: right;" (click)="addGroupSetup()">Add group</button>
+                    <button class="btn btn-primary" style="float: right;" (click)="addGroupSetup()" [disabled]="currentUser() == null">Add group</button>
                     <h2>Groups</h2>    
                     @for(group of activeGroups(); track $index) {
                         <app-group-component [group]="group" [currentUser]="currentUser()!" (selectMe)="selectGroup($event)"></app-group-component>
                     } @empty {
-                        <p>No groups found!</p>
+                        <p>{{ currentUser() == null ? "Sign in to view and create groups" : "No groups found!" }}</p>
                     }
                 </div>
             </div>
@@ -26,7 +26,7 @@
                         }
                         <h2>Details</h2>
                         @if(selectedGroup() == null) {
-                            <p>Select a group to show its details over here</p>
+                            <p>{{ ( currentUser() == null ? "Sign in to view and edit groups" : "Select a group to show and edit its details over here") }}</p>
                         } @else {
                             <p><strong>Name: </strong>{{ selectedGroup()!.name }}</p>
                             <p><strong>Description: </strong>{{ selectedGroup()!.description }}</p>
