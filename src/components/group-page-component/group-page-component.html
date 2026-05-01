@@ -22,7 +22,7 @@
                     @if(currentState() == "view") {
                         <!-- Selected group details -->
                         @if(selectedGroup() != null) {
-                            <button class="btn btn-primary" style="float: right;" (click)="editGroupSetup()">Edit</button>
+                            <button class="btn btn-primary" style="float: right;" (click)="editGroupSetup()" [disabled]="currentUser()!.email! != selectedGroup()!.ownerEmail">Edit</button>
                         }
                         <h2>Details</h2>
                         @if(selectedGroup() == null) {
