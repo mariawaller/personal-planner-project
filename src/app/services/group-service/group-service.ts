@@ -16,7 +16,7 @@ export class GroupService {
   // Create
   async addGroup(group: Group) {
     await addDoc(this.groupCollection, group);
-    this.loadGroups();
+    await this.loadGroups();
   }
 
   // Read
@@ -30,14 +30,14 @@ export class GroupService {
   async editGroup(id: string, data: Partial<Group>) {
     const groupReference = doc(database, "groups", id);
     await updateDoc(groupReference, {...data});
-    this.loadGroups();
+    await this.loadGroups();
   }
 
   // Delete
   async deleteGroup(id: string) {
     const groupReference = doc(database, "groups", id);
     await deleteDoc(groupReference);
-    this.loadGroups();
+    await this.loadGroups();
   }
 
 }

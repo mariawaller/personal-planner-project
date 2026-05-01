@@ -22,11 +22,18 @@ export class App {
 
   currentUser = signal<FirebaseUser | null>(null);
 
-  userService = inject(UserService);
+//  userService = inject(UserService);
   eventService = inject(EventService);
   groupService = inject(GroupService);
   categoryService = inject(CategoryService);
   router = inject(Router);
+
+  ngOnInit() {
+//    this.userService.loadUsers();
+    this.eventService.loadEvents();
+    this.groupService.loadGroups();
+    this.categoryService.loadCategories();
+  }
 
   constructor() {
     onAuthStateChanged(auth, (user) => {

@@ -7,7 +7,7 @@
                     <button class="btn btn-primary" style="float: right;" (click)="addGroupSetup()">Add group</button>
                     <h2>Groups</h2>    
                     @for(group of activeGroups(); track $index) {
-                        <app-group-component [group]="group" (selectMe)="selectGroup($event)"></app-group-component>
+                        <app-group-component [group]="group" [currentUser]="currentUser()!" (selectMe)="selectGroup($event)"></app-group-component>
                     } @empty {
                         <p>No groups found!</p>
                     }
@@ -30,19 +30,41 @@
                         } @else {
                             <p><strong>Name: </strong>{{ selectedGroup()!.name }}</p>
                             <p><strong>Description: </strong>{{ selectedGroup()!.description }}</p>
+                            <p><strong>Owner's Email: </strong>{{ selectedGroup()!.ownerEmail }}</p>
+                            <p><strong>Member Emails: </strong></p>
+                            <ul>
+                            @for(member of selectedGroup()!.memberEmails; track $index) {
+                                <li>{{ member }}</li>
+                            } @empty {
+                                <p>No members added</p>
+                            }
+                            </ul>
                         }
                     } @else {
                         <!-- Detail input -->
                          @if(currentState() == "add") {
-                            <button class="btn btn-primary" style="float: right;" (click)="addGroup()">Submit</button>
+                            <button class="btn btn-primary mx-1" style="float: right;" (click)="addGroup()">Submit</button>
                          } @else {
-                            <button class="btn btn-primary" style="float: right;" (click)="editGroup()">Submit</button>
+                            <button class="btn btn-danger mx-1" style="float: right;" (click)="deleteGroup()">Delete</button>
+                            <button class="btn btn-primary mx-1" style="float: right;" (click)="editGroup()">Submit</button>
                          }
                         <h2>Input details</h2>
                         <label for="nameInput" class="form-label">Group name</label>
                         <input id="nameInput" class="form-control" type="text" [(ngModel)]="groupNameInput">
                         <label for="detailsInput" class="form-label mt-2">Group details</label>
                         <input id="detailsInput" class="form-control" type="text" [(ngModel)]="groupDetailsInput">
+                        <button class="btn btn-primary" style="float: right;" (click)="addMember()">Add</button>
+                        <label for="memberInput" class="form-label mt-2">Add member by email</label>
+                        <input id="memberInput" class="form-control" type="text" [(ngModel)]="groupMemberInput">
+                        <p>Members (Emails)</p>
+                        @for(member of selectedGroup()!.memberEmails; track $index) {
+                            <div class="card">
+                                <div class="card-body">
+                                    <button class="btn btn-danger mx-1" style="float: right;" (click)="removeMember(member)">Remove</button>
+                                    {{ member }}
+                                </div>
+                            </div>
+                        }
                     }
                 </div>
             </div>
