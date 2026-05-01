@@ -4,9 +4,10 @@
         <div class="col-6">
             <div class="card">
                 <div class="card-body">
-                    <h3>Groups</h3>
+                    <button class="btn btn-primary" style="float: right;" (click)="addGroupSetup()">Add group</button>
+                    <h2>Groups</h2>    
                     @for(group of activeGroups(); track $index) {
-                        <p>{{ group.name }}</p>
+                        <app-group-component [group]="group" (selectMe)="selectGroup($event)"></app-group-component>
                     } @empty {
                         <p>No groups found!</p>
                     }
@@ -14,15 +15,34 @@
             </div>
         </div>
 
-        <!-- Selected group details -->
+        
         <div class="col-6">
             <div class="card">
                 <div class="card-body">
-                    <h3>Details</h3>
-                    @if(selectedGroup() == null) {
-                        <p>Select a group to show its details over here</p>
+                    @if(currentState() == "view") {
+                        <!-- Selected group details -->
+                        @if(selectedGroup() != null) {
+                            <button class="btn btn-primary" style="float: right;" (click)="editGroupSetup()">Edit</button>
+                        }
+                        <h2>Details</h2>
+                        @if(selectedGroup() == null) {
+                            <p>Select a group to show its details over here</p>
+                        } @else {
+                            <p><strong>Name: </strong>{{ selectedGroup()!.name }}</p>
+                            <p><strong>Description: </strong>{{ selectedGroup()!.description }}</p>
+                        }
                     } @else {
-                        <p>group details</p>
+                        <!-- Detail input -->
+                         @if(currentState() == "add") {
+                            <button class="btn btn-primary" style="float: right;" (click)="addGroup()">Submit</button>
+                         } @else {
+                            <button class="btn btn-primary" style="float: right;" (click)="editGroup()">Submit</button>
+                         }
+                        <h2>Input details</h2>
+                        <label for="nameInput" class="form-label">Group name</label>
+                        <input id="nameInput" class="form-control" type="text" [(ngModel)]="groupNameInput">
+                        <label for="detailsInput" class="form-label mt-2">Group details</label>
+                        <input id="detailsInput" class="form-control" type="text" [(ngModel)]="groupDetailsInput">
                     }
                 </div>
             </div>
