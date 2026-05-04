@@ -162,9 +162,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   private subscribeToTasks(uid: string) {
     this.loading = true;
-    const q = query(collection(database, 'tasks'), where('userId', '==', uid));
+    const q = query(collection(database, 'tasks'));
     this.unsubTasks = onSnapshot(q, (snapshot) => {
-      this.tasks = snapshot.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Task, 'id'>) }));
+      this.tasks = snapshot.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Task, 'id'>) })).filter(task => task.userId == uid || this.groupService.getGroupByID(task.groupID)?.memberEmails.includes(this.currentUser?.email!));
       this.loading = false;
     });
   }
@@ -205,7 +205,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   async deleteTask(task: Task) {
-    await deleteDoc(doc(database, 'tasks', task.id));
+    if (task.userId == this.currentUser?.uid) {
+      await deleteDoc(doc(database, 'tasks', task.id));
+    }
   }
 
   hasTask(dateStr: string): boolean {

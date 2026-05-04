@@ -122,7 +122,7 @@
           <mat-checkbox [checked]="task.completed" (change)="toggleComplete(task)" color="primary" style="float: left;">
           </mat-checkbox>
 
-          <button mat-icon-button color="warn" (click)="deleteTask(task)" matTooltip="Delete" style="float: right">
+          <button mat-icon-button color="warn" (click)="deleteTask(task)" matTooltip="Delete" style="float: right" [disabled]="task.userId != currentUser.uid">
             <mat-icon>delete_outline</mat-icon>
           </button>
   
