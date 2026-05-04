@@ -35,39 +35,55 @@
   </mat-card>
 
   <div class="tasks-panel">
-    <h2 class="date-heading">{{ selectedDateLabel }}</h2>
-    <p class="task-count">{{ completedCount }} / {{ tasksForDay.length }} done</p>
-
-    <div class="add-task-row">
-      <mat-form-field appearance="outline" class="task-input">
-        <mat-label>Add a task…</mat-label>
-        <input matInput [(ngModel)]="newTaskTitle" (keyup.enter)="addTask()" />
-      </mat-form-field>
-      <button mat-flat-button color="primary" (click)="addTask()">
-        <mat-icon>add</mat-icon> Add
-      </button>
-    </div>
-
-    @if (tasksForDay.length === 0) {
+    @if (!currentUser && !loading) {
       <div class="empty">
-        <mat-icon>event_available</mat-icon>
-        <p>No tasks for this day</p>
+        <mat-icon>lock</mat-icon>
+        <p>Please log in to see your tasks.</p>
       </div>
     }
 
-    @for (task of tasksForDay; track task.id) {
-      <mat-card class="task-card" [class.done]="task.completed">
-        <mat-checkbox [checked]="task.completed" (change)="toggleComplete(task)" color="primary">
-        </mat-checkbox>
+    @if (loading) {
+      <div class="empty">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Loading tasks…</p>
+      </div>
+    }
 
-        <span class="task-title" [class.strikethrough]="task.completed">
-          {{ task.title }}
-        </span>
+    @if (currentUser && !loading) {
+      <h2 class="date-heading">{{ selectedDateLabel }}</h2>
+      <p class="task-count">{{ completedCount }} / {{ tasksForDay.length }} done</p>
 
-        <button mat-icon-button color="warn" (click)="deleteTask(task)" matTooltip="Delete">
-          <mat-icon>delete_outline</mat-icon>
+      <div class="add-task-row">
+        <mat-form-field appearance="outline" class="task-input">
+          <mat-label>Add a task…</mat-label>
+          <input matInput [(ngModel)]="newTaskTitle" (keyup.enter)="addTask()" />
+        </mat-form-field>
+        <button mat-flat-button color="primary" (click)="addTask()">
+          <mat-icon>add</mat-icon> Add
         </button>
-      </mat-card>
+      </div>
+
+      @if (tasksForDay.length === 0) {
+        <div class="empty">
+          <mat-icon>event_available</mat-icon>
+          <p>No tasks for this day</p>
+        </div>
+      }
+
+      @for (task of tasksForDay; track task.id) {
+        <mat-card class="task-card" [class.done]="task.completed">
+          <mat-checkbox [checked]="task.completed" (change)="toggleComplete(task)" color="primary">
+          </mat-checkbox>
+
+          <span class="task-title" [class.strikethrough]="task.completed">
+            {{ task.title }}
+          </span>
+
+          <button mat-icon-button color="warn" (click)="deleteTask(task)" matTooltip="Delete">
+            <mat-icon>delete_outline</mat-icon>
+          </button>
+        </mat-card>
+      }
     }
   </div>
 </div>

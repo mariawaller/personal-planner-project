@@ -1,19 +1,33 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MatCardModule } from '@angular/material/card';
+import { MatCard } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { auth, database } from '../../app/firebase.config';
+import { onAuthStateChanged, User, Unsubscribe } from 'firebase/auth';
+import {
+  collection,
+  query,
+  where,
+  onSnapshot,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+} from 'firebase/firestore';
 
 export interface Task {
   id: string;
   title: string;
   date: string;
   completed: boolean;
+  userId: string;
 }
 
 export interface CalDay {
@@ -28,22 +42,28 @@ export interface CalDay {
   imports: [
     CommonModule,
     FormsModule,
-    MatCardModule,
+    MatCard,
     MatButtonModule,
     MatIconModule,
     MatInputModule,
     MatFormFieldModule,
     MatCheckboxModule,
     MatTooltipModule,
+    MatProgressSpinnerModule,
   ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   tasks: Task[] = [];
+  currentUser: User | null = null;
+  loading = true;
   viewDate = new Date();
   selectedDate = this.toDateStr(new Date());
   newTaskTitle = '';
+
+  private unsubAuth!: Unsubscribe;
+  private unsubTasks: Unsubscribe | null = null;
 
   get monthLabel(): string {
     return this.viewDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
@@ -85,8 +105,35 @@ export class DashboardComponent implements OnInit {
   }
 
   ngOnInit() {
-    const saved = localStorage.getItem('planner_tasks');
-    if (saved) this.tasks = JSON.parse(saved);
+    this.unsubAuth = onAuthStateChanged(auth, (user) => {
+      this.currentUser = user;
+      if (user) {
+        this.subscribeToTasks(user.uid);
+      } else {
+        this.unsubTasks?.();
+        this.tasks = [];
+        this.loading = false;
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    this.unsubAuth?.();
+    this.unsubTasks?.();
+  }
+
+  private subscribeToTasks(uid: string) {
+    this.loading = true;
+
+    const q = query(collection(database, 'tasks'), where('userId', '==', uid));
+
+    this.unsubTasks = onSnapshot(q, (snapshot) => {
+      this.tasks = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...(doc.data() as Omit<Task, 'id'>),
+      }));
+      this.loading = false;
+    });
   }
 
   prevMonth() {
@@ -106,27 +153,28 @@ export class DashboardComponent implements OnInit {
     if (day.inMonth) this.selectedDate = day.dateStr;
   }
 
-  addTask() {
+  async addTask() {
     const title = this.newTaskTitle.trim();
-    if (!title) return;
-    this.tasks.push({
-      id: crypto.randomUUID(),
+    if (!title || !this.currentUser) return;
+
+    this.newTaskTitle = '';
+
+    await addDoc(collection(database, 'tasks'), {
       title,
       date: this.selectedDate,
       completed: false,
+      userId: this.currentUser.uid,
     });
-    this.newTaskTitle = '';
-    this.save();
   }
 
-  toggleComplete(task: Task) {
-    task.completed = !task.completed;
-    this.save();
+  async toggleComplete(task: Task) {
+    await updateDoc(doc(database, 'tasks', task.id), {
+      completed: !task.completed,
+    });
   }
 
-  deleteTask(task: Task) {
-    this.tasks = this.tasks.filter((t) => t.id !== task.id);
-    this.save();
+  async deleteTask(task: Task) {
+    await deleteDoc(doc(database, 'tasks', task.id));
   }
 
   hasTask(dateStr: string): boolean {
@@ -139,9 +187,5 @@ export class DashboardComponent implements OnInit {
 
   toDateStr(d: Date): string {
     return d.toISOString().slice(0, 10);
-  }
-
-  private save() {
-    localStorage.setItem('planner_tasks', JSON.stringify(this.tasks));
   }
 }
