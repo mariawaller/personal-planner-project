@@ -6,7 +6,7 @@
   gap: 28px;
   padding: 28px;
   min-height: 100vh;
-  background: #f5f6fa;
+  background: #c1e1ee;
   font-family: 'DM Sans', 'Segoe UI', sans-serif;
 }
 
@@ -238,6 +238,28 @@
     text-decoration: line-through;
     color: #bbb;
   }
+
+}
+.task-time {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  margin-top: 6px;
+  border-radius: 8px;
+
+  font-size: 0.78rem;
+  font-weight: 600;
+
+  background: #eef2ff;
+  color: #3f51b5;
+}
+
+.task-time mat-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  opacity: 0.85;
 }
 
 .cat-badge {

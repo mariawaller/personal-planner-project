@@ -122,7 +122,7 @@
           <mat-checkbox [checked]="task.completed" (change)="toggleComplete(task)" color="primary" style="float: left;">
           </mat-checkbox>
 
-          <button mat-icon-button color="warn" (click)="deleteTask(task)" matTooltip="Delete" style="float: right" [disabled]="task.userId != currentUser.uid">
+          <button mat-icon-button color="warn" (click)="deleteTask(task)" matTooltip="Delete" style="float: right">
             <mat-icon>delete_outline</mat-icon>
           </button>
   
@@ -132,6 +132,9 @@
   
           <span class="task-title" [class.strikethrough]="task.completed" style="margin-right: 1em">
             {{ task.title }} <span style="color: slategrey">{{ groupService.getGroupByID(task.groupID)?.name != null ? '(' + groupService.getGroupByID(task.groupID)?.name + ')' : "" }}</span>
+          </span>
+          <span class="time">
+          {{ formatTaskTime(task.time) }}
           </span>
           </div>
 
