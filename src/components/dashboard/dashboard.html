@@ -107,20 +107,23 @@
           [class.done]="task.completed"
           [style.border-left-color]="cat.color"
         >
-          <mat-checkbox [checked]="task.completed" (change)="toggleComplete(task)" color="primary">
+        <div style="max-width: 200em;">
+          <mat-checkbox [checked]="task.completed" (change)="toggleComplete(task)" color="primary" style="float: left;">
           </mat-checkbox>
 
+          <button mat-icon-button color="warn" (click)="deleteTask(task)" matTooltip="Delete" style="float: right">
+            <mat-icon>delete_outline</mat-icon>
+          </button>
+  
+          <span class="cat-badge" [style.background]="cat.color + '22'" [style.color]="cat.color" style="float: right">
+            <mat-icon>{{ cat.icon }}</mat-icon>
+          </span>
+  
           <span class="task-title" [class.strikethrough]="task.completed">
             {{ task.title }}
           </span>
+          </div>
 
-          <span class="cat-badge" [style.background]="cat.color + '22'" [style.color]="cat.color">
-            <mat-icon>{{ cat.icon }}</mat-icon>
-          </span>
-
-          <button mat-icon-button color="warn" (click)="deleteTask(task)" matTooltip="Delete">
-            <mat-icon>delete_outline</mat-icon>
-          </button>
         </mat-card>
       }
     }
