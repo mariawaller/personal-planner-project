@@ -12,6 +12,16 @@ export class GroupService {
   groupCollection = collection(database, "groups");
   groups = signal<Group[]>([]);
 
+
+  getGroupByID(id: string): Group | null {
+    const result = this.groups().filter(group => group.id! == id);
+    if (result.length != 1) {
+      return null;
+    } else {
+      return result[0];
+    }
+  }
+
   // CRUD Operations
   // Create
   async addGroup(group: Group) {
