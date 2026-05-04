@@ -9,6 +9,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSelectModule } from '@angular/material/select';
+import { MatChipsModule } from '@angular/material/chips';
+
 import { auth, database } from '../../app/firebase.config';
 import { onAuthStateChanged, User, Unsubscribe } from 'firebase/auth';
 import {
@@ -22,18 +25,28 @@ import {
   doc,
 } from 'firebase/firestore';
 
+export type TaskCategory = 'work' | 'personal' | 'health' | 'kids' | 'other';
+
 export interface Task {
   id: string;
   title: string;
   date: string;
   completed: boolean;
   userId: string;
+  category: TaskCategory;
 }
 
 export interface CalDay {
   dayNum: number;
   dateStr: string;
   inMonth: boolean;
+}
+
+export interface CategoryOption {
+  value: TaskCategory;
+  label: string;
+  icon: string;
+  color: string;
 }
 
 @Component({
@@ -50,6 +63,8 @@ export interface CalDay {
     MatCheckboxModule,
     MatTooltipModule,
     MatProgressSpinnerModule,
+    MatSelectModule,
+    MatChipsModule,
   ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
@@ -61,9 +76,23 @@ export class DashboardComponent implements OnInit, OnDestroy {
   viewDate = new Date();
   selectedDate = this.toDateStr(new Date());
   newTaskTitle = '';
+  newTaskCategory: TaskCategory = 'personal';
+  filterCategory: TaskCategory | 'all' = 'all';
 
   private unsubAuth!: Unsubscribe;
   private unsubTasks: Unsubscribe | null = null;
+
+  readonly categories: CategoryOption[] = [
+    { value: 'work', label: 'Work', icon: 'work', color: '#5C6BC0' },
+    { value: 'personal', label: 'Personal', icon: 'home', color: '#26A69A' },
+    { value: 'health', label: 'Health', icon: 'favorite', color: '#EF5350' },
+    { value: 'kids', label: 'Kids', icon: 'child_care', color: '#FFA726' },
+    { value: 'other', label: 'Other', icon: 'push_pin', color: '#AB47BC' },
+  ];
+
+  getCat(value: TaskCategory): CategoryOption {
+    return this.categories.find((c) => c.value === value) ?? this.categories[4];
+  }
 
   get monthLabel(): string {
     return this.viewDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
@@ -97,7 +126,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   get tasksForDay(): Task[] {
-    return this.tasks.filter((t) => t.date === this.selectedDate);
+    return this.tasks
+      .filter((t) => t.date === this.selectedDate)
+      .filter((t) => this.filterCategory === 'all' || t.category === this.filterCategory);
   }
 
   get completedCount(): number {
@@ -124,14 +155,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   private subscribeToTasks(uid: string) {
     this.loading = true;
-
     const q = query(collection(database, 'tasks'), where('userId', '==', uid));
-
     this.unsubTasks = onSnapshot(q, (snapshot) => {
-      this.tasks = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...(doc.data() as Omit<Task, 'id'>),
-      }));
+      this.tasks = snapshot.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Task, 'id'>) }));
       this.loading = false;
     });
   }
@@ -156,21 +182,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
   async addTask() {
     const title = this.newTaskTitle.trim();
     if (!title || !this.currentUser) return;
-
     this.newTaskTitle = '';
-
     await addDoc(collection(database, 'tasks'), {
       title,
       date: this.selectedDate,
       completed: false,
       userId: this.currentUser.uid,
+      category: this.newTaskCategory,
     });
   }
 
   async toggleComplete(task: Task) {
-    await updateDoc(doc(database, 'tasks', task.id), {
-      completed: !task.completed,
-    });
+    await updateDoc(doc(database, 'tasks', task.id), { completed: !task.completed });
   }
 
   async deleteTask(task: Task) {
