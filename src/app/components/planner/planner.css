@@ -1,9 +1,7 @@
-/* make both sides align nicely */
 .row {
   align-items: flex-start;
 }
 
-/* optional spacing */
 .col-md-8 {
   padding-right: 15px;
 }
