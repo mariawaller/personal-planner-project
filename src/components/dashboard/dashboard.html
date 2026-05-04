@@ -133,7 +133,7 @@
           <span class="task-title" [class.strikethrough]="task.completed" style="margin-right: 1em">
             {{ task.title }} <span style="color: slategrey">{{ groupService.getGroupByID(task.groupID)?.name != null ? '(' + groupService.getGroupByID(task.groupID)?.name + ')' : "" }}</span>
           </span>
-          <span class="time">
+          <span class="task-time">
           {{ formatTaskTime(task.time) }}
           </span>
           </div>
