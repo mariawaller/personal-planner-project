@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatCard } from '@angular/material/card';
@@ -24,6 +24,8 @@ import {
   deleteDoc,
   doc,
 } from 'firebase/firestore';
+import { Group } from '../../app/models/group';
+import { GroupService } from '../../app/services/group-service/group-service';
 
 export type TaskCategory = 'work' | 'personal' | 'health' | 'kids' | 'other';
 
@@ -34,6 +36,7 @@ export interface Task {
   completed: boolean;
   userId: string;
   category: TaskCategory;
+  groupID: string;
 }
 
 export interface CalDay {
@@ -77,7 +80,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
   selectedDate = this.toDateStr(new Date());
   newTaskTitle = '';
   newTaskCategory: TaskCategory = 'personal';
+  newTaskGroup = signal<string>("");
   filterCategory: TaskCategory | 'all' = 'all';
+
+  groupService = inject(GroupService);
+  ownedGroups = computed<Group[]>( () => this.groupService.groups().filter( group => group.ownerEmail == this.currentUser?.email) )
 
   private unsubAuth!: Unsubscribe;
   private unsubTasks: Unsubscribe | null = null;
@@ -189,6 +196,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       completed: false,
       userId: this.currentUser.uid,
       category: this.newTaskCategory,
+      groupID: this.newTaskGroup(),
     });
   }
 
