@@ -1,1 +1,73 @@
-<h1>draobhsad</h1>
+<div class="planner">
+  <mat-card class="calendar-card">
+    <div class="month-nav">
+      <button mat-icon-button (click)="prevMonth()">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+      <span class="month-label">{{ monthLabel }}</span>
+      <button mat-icon-button (click)="nextMonth()">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+    </div>
+
+    <button mat-stroked-button class="today-btn" (click)="goToday()">Today</button>
+
+    <div class="cal-grid">
+      @for (d of ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']; track d) {
+        <div class="weekday-header">{{ d }}</div>
+      }
+
+      @for (day of calDays; track day.dateStr) {
+        <div
+          class="cal-day"
+          [class.other-month]="!day.inMonth"
+          [class.is-today]="isToday(day.dateStr)"
+          [class.is-selected]="day.dateStr === selectedDate"
+          (click)="selectDay(day)"
+        >
+          {{ day.dayNum }}
+          @if (day.inMonth && hasTask(day.dateStr)) {
+            <span class="task-dot"></span>
+          }
+        </div>
+      }
+    </div>
+  </mat-card>
+
+  <div class="tasks-panel">
+    <h2 class="date-heading">{{ selectedDateLabel }}</h2>
+    <p class="task-count">{{ completedCount }} / {{ tasksForDay.length }} done</p>
+
+    <div class="add-task-row">
+      <mat-form-field appearance="outline" class="task-input">
+        <mat-label>Add a task…</mat-label>
+        <input matInput [(ngModel)]="newTaskTitle" (keyup.enter)="addTask()" />
+      </mat-form-field>
+      <button mat-flat-button color="primary" (click)="addTask()">
+        <mat-icon>add</mat-icon> Add
+      </button>
+    </div>
+
+    @if (tasksForDay.length === 0) {
+      <div class="empty">
+        <mat-icon>event_available</mat-icon>
+        <p>No tasks for this day</p>
+      </div>
+    }
+
+    @for (task of tasksForDay; track task.id) {
+      <mat-card class="task-card" [class.done]="task.completed">
+        <mat-checkbox [checked]="task.completed" (change)="toggleComplete(task)" color="primary">
+        </mat-checkbox>
+
+        <span class="task-title" [class.strikethrough]="task.completed">
+          {{ task.title }}
+        </span>
+
+        <button mat-icon-button color="warn" (click)="deleteTask(task)" matTooltip="Delete">
+          <mat-icon>delete_outline</mat-icon>
+        </button>
+      </mat-card>
+    }
+  </div>
+</div>
