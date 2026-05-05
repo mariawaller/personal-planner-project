@@ -6,15 +6,12 @@ import { addDoc, collection, deleteDoc, doc, getDocs, updateDoc } from 'firebase
 @Injectable({
   providedIn: 'root',
 })
-
 export class GroupService {
-
-  groupCollection = collection(database, "groups");
+  groupCollection = collection(database, 'groups');
   groups = signal<Group[]>([]);
 
-
   getGroupByID(id: string): Group | null {
-    const result = this.groups().filter(group => group.id! == id);
+    const result = this.groups().filter((group) => group.id! == id);
     if (result.length != 1) {
       return null;
     } else {
@@ -32,22 +29,21 @@ export class GroupService {
   // Read
   async loadGroups() {
     const snapshot = await getDocs(this.groupCollection);
-    const data = snapshot.docs.map(doc => ({...doc.data(), id: doc.id})) as Group[];
+    const data = snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })) as Group[];
     this.groups.set(data);
   }
 
   // Update
   async editGroup(id: string, data: Partial<Group>) {
-    const groupReference = doc(database, "groups", id);
-    await updateDoc(groupReference, {...data});
+    const groupReference = doc(database, 'groups', id);
+    await updateDoc(groupReference, { ...data });
     await this.loadGroups();
   }
 
   // Delete
   async deleteGroup(id: string) {
-    const groupReference = doc(database, "groups", id);
+    const groupReference = doc(database, 'groups', id);
     await deleteDoc(groupReference);
     await this.loadGroups();
   }
-
 }

@@ -17,7 +17,6 @@ import { onAuthStateChanged, User, Unsubscribe } from 'firebase/auth';
 import {
   collection,
   query,
-  where,
   onSnapshot,
   addDoc,
   updateDoc,
@@ -37,7 +36,6 @@ export interface Task {
   userId: string;
   category: TaskCategory;
   groupID: string;
-
   time?: {
     hour: number;
     minute: number;
@@ -86,11 +84,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
   newTaskTitle = '';
   newTaskTime = '';
   newTaskCategory: TaskCategory = 'personal';
-  newTaskGroup = signal<string>("");
+  newTaskGroup = signal<string>('');
   filterCategory: TaskCategory | 'all' = 'all';
 
   groupService = inject(GroupService);
-  ownedGroups = computed<Group[]>( () => this.groupService.groups().filter( group => group.ownerEmail == this.currentUser?.email) )
+  ownedGroups = computed<Group[]>(() =>
+    this.groupService.groups().filter((group) => group.ownerEmail == this.currentUser?.email),
+  );
 
   private unsubAuth!: Unsubscribe;
   private unsubTasks: Unsubscribe | null = null;
@@ -143,11 +143,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
       .filter((t) => t.date === this.selectedDate)
       .filter((t) => this.filterCategory === 'all' || t.category === this.filterCategory)
       .sort((a, b) => {
-         const aTime = a.time ? a.time.hour * 60 + a.time.minute : 99999;
-         const bTime = b.time ? b.time.hour * 60 + b.time.minute : 99999;
-
-       return aTime - bTime;
-});
+        const aTime = a.time ? a.time.hour * 60 + a.time.minute : 99999;
+        const bTime = b.time ? b.time.hour * 60 + b.time.minute : 99999;
+        return aTime - bTime;
+      });
   }
 
   get completedCount(): number {
@@ -176,7 +175,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.loading = true;
     const q = query(collection(database, 'tasks'));
     this.unsubTasks = onSnapshot(q, (snapshot) => {
-      this.tasks = snapshot.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Task, 'id'>) })).filter(task => task.userId == uid || this.groupService.getGroupByID(task.groupID)?.memberEmails.includes(this.currentUser?.email!));
+      this.tasks = snapshot.docs
+        .map((d) => ({ id: d.id, ...(d.data() as Omit<Task, 'id'>) }))
+        .filter(
+          (task) =>
+            task.userId == uid ||
+            this.groupService
+              .getGroupByID(task.groupID)
+              ?.memberEmails.includes(this.currentUser?.email!),
+        );
       this.loading = false;
     });
   }
@@ -198,28 +205,28 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (day.inMonth) this.selectedDate = day.dateStr;
   }
 
-   async addTask() {
-   const title = this.newTaskTitle.trim();
-   if (!title || !this.currentUser) return;
-   if (!title || !this.currentUser || !this.newTaskTime) return;
-   
-   await addDoc(collection(database, 'tasks'), {
-     title,
-     date: this.selectedDate,
-     time: this.newTaskTime? {
-      hour: Number(this.newTaskTime.split(':')[0]),
-      minute: Number(this.newTaskTime.split(':')[1]),
-    }
-  : null,
-     completed: false,
-     userId: this.currentUser.uid,
-     category: this.newTaskCategory,
-     groupID: this.newTaskGroup(),
-   });
+  async addTask() {
+    const title = this.newTaskTitle.trim();
+    if (!title || !this.currentUser) return;
 
-   this.newTaskTitle = '';
-   this.newTaskTime = '';
- }
+    await addDoc(collection(database, 'tasks'), {
+      title,
+      date: this.selectedDate,
+      time: this.newTaskTime
+        ? {
+            hour: Number(this.newTaskTime.split(':')[0]),
+            minute: Number(this.newTaskTime.split(':')[1]),
+          }
+        : null,
+      completed: false,
+      userId: this.currentUser.uid,
+      category: this.newTaskCategory,
+      groupID: this.newTaskGroup(),
+    });
+
+    this.newTaskTitle = '';
+    this.newTaskTime = '';
+  }
 
   async toggleComplete(task: Task) {
     await updateDoc(doc(database, 'tasks', task.id), { completed: !task.completed });
@@ -242,16 +249,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
   toDateStr(d: Date): string {
     return d.toISOString().slice(0, 10);
   }
+
   formatTaskTime(time?: { hour: number; minute: number }): string {
-  if (!time) return '';
-
-  const date = new Date();
-  date.setHours(time.hour, time.minute);
-
-  return date.toLocaleTimeString([], {
-    hour: 'numeric',
-    minute: '2-digit',
-  });
+    if (!time) return '';
+    const date = new Date();
+    date.setHours(time.hour, time.minute);
+    return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  }
 }
-}
-

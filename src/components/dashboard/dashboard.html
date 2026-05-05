@@ -58,22 +58,16 @@
           <input matInput [(ngModel)]="newTaskTitle" (keyup.enter)="addTask()" />
         </mat-form-field>
 
+        <mat-form-field appearance="outline" class="time-input">
+          <mat-label>Time</mat-label>
+          <input matInput type="time" [(ngModel)]="newTaskTime" />
+        </mat-form-field>
+
         <mat-form-field appearance="outline" class="cat-select">
           <mat-label>Category</mat-label>
           <mat-select [(ngModel)]="newTaskCategory">
             @for (cat of categories; track cat.value) {
               <mat-option [value]="cat.value">{{ cat.label }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-
-        <!-- Group set field -->
-        <mat-form-field appearance="outline" class="cat-select">
-          <mat-label>Group</mat-label>
-          <mat-select [(ngModel)]="newTaskGroup">
-            <mat-option value="">None</mat-option>
-            @for (group of ownedGroups(); track $index) {
-              <mat-option [value]="group.id!">{{ group.name }}</mat-option>
             }
           </mat-select>
         </mat-form-field>
@@ -118,26 +112,27 @@
           [class.done]="task.completed"
           [style.border-left-color]="cat.color"
         >
-        <div>
-          <mat-checkbox [checked]="task.completed" (change)="toggleComplete(task)" color="primary" style="float: left;">
+          <mat-checkbox [checked]="task.completed" (change)="toggleComplete(task)" color="primary">
           </mat-checkbox>
 
-          <button mat-icon-button color="warn" (click)="deleteTask(task)" matTooltip="Delete" style="float: right">
-            <mat-icon>delete_outline</mat-icon>
-          </button>
-  
-          <span class="cat-badge" [style.background]="cat.color + '22'" [style.color]="cat.color" style="float: right">
+          <span class="task-title" [class.strikethrough]="task.completed">
+            {{ task.title }}
+          </span>
+
+          @if (task.time) {
+            <span class="task-time">
+              <mat-icon>schedule</mat-icon>
+              {{ formatTaskTime(task.time) }}
+            </span>
+          }
+
+          <span class="cat-badge" [style.background]="cat.color + '22'" [style.color]="cat.color">
             <mat-icon>{{ cat.icon }}</mat-icon>
           </span>
-  
-          <span class="task-title" [class.strikethrough]="task.completed" style="margin-right: 1em">
-            {{ task.title }} <span style="color: slategrey">{{ groupService.getGroupByID(task.groupID)?.name != null ? '(' + groupService.getGroupByID(task.groupID)?.name + ')' : "" }}</span>
-          </span>
-          <span class="task-time">
-          {{ formatTaskTime(task.time) }}
-          </span>
-          </div>
 
+          <button mat-icon-button color="warn" (click)="deleteTask(task)" matTooltip="Delete">
+            <mat-icon>delete_outline</mat-icon>
+          </button>
         </mat-card>
       }
     }
