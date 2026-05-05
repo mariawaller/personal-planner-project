@@ -82,6 +82,7 @@ export class GroupPageComponent {
   deleteGroup() {
     this.groupService.deleteGroup(this.selectedGroup()!.id!);
     this.selectedGroup.set(null);
+    this.currentState.set("view");
   }
 }
 
