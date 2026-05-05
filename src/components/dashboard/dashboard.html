@@ -141,7 +141,7 @@
             <mat-icon>{{ cat.icon }}</mat-icon>
           </span>
 
-          <button mat-icon-button color="warn" (click)="deleteTask(task)" matTooltip="Delete">
+          <button mat-icon-button color="warn" (click)="deleteTask(task)" matTooltip="Delete" [disabled]="currentUser()!.uid != task.userId">
             <mat-icon>delete_outline</mat-icon>
           </button>
           </div>
