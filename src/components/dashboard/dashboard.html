@@ -72,6 +72,16 @@
           </mat-select>
         </mat-form-field>
 
+        <mat-form-field appearance="outline" class="cat-select">
+          <mat-label>Group</mat-label>
+          <mat-select [(ngModel)]="newTaskGroup">
+            <mat-option value="">None</mat-option>
+            @for (group of ownedGroups(); track $index) {
+              <mat-option [value]="group.id">{{ group.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
         <button mat-flat-button color="primary" (click)="addTask()">
           <mat-icon>add</mat-icon> Add
         </button>
@@ -112,11 +122,12 @@
           [class.done]="task.completed"
           [style.border-left-color]="cat.color"
         >
+          <div>
           <mat-checkbox [checked]="task.completed" (change)="toggleComplete(task)" color="primary">
           </mat-checkbox>
 
           <span class="task-title" [class.strikethrough]="task.completed">
-            {{ task.title }}
+            {{ task.title }} <span style="color: slategrey">{{ groupService.getGroupByID(task.groupID) == null ? "" : "(" + groupService.getGroupByID(task.groupID)!.name + ")" }}</span>
           </span>
 
           @if (task.time) {
@@ -133,6 +144,7 @@
           <button mat-icon-button color="warn" (click)="deleteTask(task)" matTooltip="Delete">
             <mat-icon>delete_outline</mat-icon>
           </button>
+          </div>
         </mat-card>
       }
     }
