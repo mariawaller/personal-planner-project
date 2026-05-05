@@ -26,15 +26,18 @@ export class GroupPageComponent {
   groupNameInput = signal<string>("");
   groupDetailsInput = signal<string>("");
   groupMemberInput = signal<string>("");
+  selectedGroupMembers = signal<string[]>([]);
 
   selectGroup(group: Group) {
     this.currentState.set("view");
     this.selectedGroup.set(group);
+    this.selectedGroupMembers.set(this.selectedGroup()!.memberEmails);
   }
 
   resetFields() {
     this.groupNameInput.set("");
     this.groupDetailsInput.set("");
+    this.selectedGroupMembers.set([])
   }
 
   addGroupSetup() {
@@ -43,7 +46,7 @@ export class GroupPageComponent {
   }
 
   addGroup() {
-    this.groupService.addGroup({name: this.groupNameInput(), description: this.groupDetailsInput(), ownerEmail: this.currentUser()!.email!, memberEmails: [] })
+    this.groupService.addGroup({name: this.groupNameInput(), description: this.groupDetailsInput(), ownerEmail: this.currentUser()!.email!, memberEmails: this.selectedGroupMembers() })
     this.currentState.set("view");
   }
 
@@ -52,6 +55,7 @@ export class GroupPageComponent {
       this.currentState.set("edit");
       this.groupNameInput.set(this.selectedGroup()!.name);
       this.groupDetailsInput.set(this.selectedGroup()!.description);
+      this.selectedGroupMembers.set(this.selectedGroup()!.memberEmails);
     } else {
       // no permissions, no edit
     }
@@ -60,17 +64,19 @@ export class GroupPageComponent {
   editGroup() {
     const newName = (this.groupNameInput() == "" ? this.selectedGroup()!.name : this.groupNameInput());
     const newDescription = (this.groupDetailsInput() == "" ? this.selectedGroup()!.description : this.groupDetailsInput());
-    this.groupService.editGroup(this.selectedGroup()!.id!, {name: newName, description: newDescription});
+    this.groupService.editGroup(this.selectedGroup()!.id!, {name: newName, description: newDescription, memberEmails: this.selectedGroupMembers()});
     this.currentState.set("view");
   }
 
   async addMember() {
-    await this.groupService.editGroup(this.selectedGroup()!.id!, {memberEmails: [...this.selectedGroup()!.memberEmails, this.groupMemberInput()]});
+    this.selectedGroupMembers.update(memberList => [...memberList, this.groupMemberInput()])
+//    await this.groupService.editGroup(this.selectedGroup()!.id!, {memberEmails: [...this.selectedGroup()!.memberEmails, this.groupMemberInput()]});
     this.groupMemberInput.set("");
   }
 
   async removeMember(memberEmail: string) {
-    await this.groupService.editGroup(this.selectedGroup()!.id!, {memberEmails: this.selectedGroup()!.memberEmails.filter(email => email != memberEmail)});
+    this.selectedGroupMembers.update(memberList => memberList.filter(member => member != memberEmail))
+//    await this.groupService.editGroup(this.selectedGroup()!.id!, {memberEmails: this.selectedGroup()!.memberEmails.filter(email => email != memberEmail)});
   }
 
   deleteGroup() {

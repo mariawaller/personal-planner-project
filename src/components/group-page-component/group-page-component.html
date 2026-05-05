@@ -33,7 +33,7 @@
                             <p><strong>Owner's Email: </strong>{{ selectedGroup()!.ownerEmail }}</p>
                             <p><strong>Member Emails: </strong></p>
                             <ul>
-                            @for(member of selectedGroup()!.memberEmails; track $index) {
+                            @for(member of selectedGroupMembers(); track $index) {
                                 <li>{{ member }}</li>
                             } @empty {
                                 <p>No members added</p>
@@ -57,7 +57,7 @@
                         <label for="memberInput" class="form-label mt-2">Add member by email</label>
                         <input id="memberInput" class="form-control" type="text" [(ngModel)]="groupMemberInput">
                         <p>Members (Emails)</p>
-                        @for(member of selectedGroup()!.memberEmails; track $index) {
+                        @for(member of selectedGroupMembers(); track $index) {
                             <div class="card">
                                 <div class="card-body">
                                     <button class="btn btn-danger mx-1" style="float: right;" (click)="removeMember(member)">Remove</button>
