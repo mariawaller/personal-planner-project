@@ -76,20 +76,20 @@ export interface CategoryOption {
   styleUrl: './dashboard.css',
 })
 export class DashboardComponent implements OnInit, OnDestroy {
-  tasks: Task[] = [];
-  currentUser: User | null = null;
-  loading = true;
-  viewDate = new Date();
-  selectedDate = this.toDateStr(new Date());
+  tasks = signal<Task[]>([]);
+  currentUser = signal<User | null>(null);
+  loading = signal(true);
+  viewDate = signal(new Date());
+  selectedDate = signal(this.toDateStr(new Date()));
   newTaskTitle = '';
   newTaskTime = '';
   newTaskCategory: TaskCategory = 'personal';
   newTaskGroup = signal<string>('');
-  filterCategory: TaskCategory | 'all' = 'all';
+  filterCategory = signal<TaskCategory | 'all'>('all');
 
   groupService = inject(GroupService);
   ownedGroups = computed<Group[]>(() =>
-    this.groupService.groups().filter((group) => group.ownerEmail == this.currentUser?.email),
+    this.groupService.groups().filter((group) => group.ownerEmail == this.currentUser()?.email),
   );
 
   private unsubAuth!: Unsubscribe;
@@ -108,12 +108,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   get monthLabel(): string {
-    return this.viewDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    return this.viewDate().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   }
 
   get calDays(): CalDay[] {
-    const year = this.viewDate.getFullYear();
-    const month = this.viewDate.getMonth();
+    const year = this.viewDate().getFullYear();
+    const month = this.viewDate().getMonth();
     const firstWeekday = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const days: CalDay[] = [];
@@ -134,34 +134,35 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   get selectedDateLabel(): string {
-    const d = new Date(this.selectedDate + 'T00:00:00');
+    const d = new Date(this.selectedDate() + 'T00:00:00');
     return d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
   }
 
-  get tasksForDay(): Task[] {
-    return this.tasks
-      .filter((t) => t.date === this.selectedDate)
-      .filter((t) => this.filterCategory === 'all' || t.category === this.filterCategory)
+  tasksForDay = computed(() =>
+    this.tasks()
+      .filter((t) => t.date === this.selectedDate())
+      .filter((t) => this.filterCategory() === 'all' || t.category === this.filterCategory())
       .sort((a, b) => {
         const aTime = a.time ? a.time.hour * 60 + a.time.minute : 99999;
         const bTime = b.time ? b.time.hour * 60 + b.time.minute : 99999;
         return aTime - bTime;
-      });
-  }
+      }),
+  );
 
-  get completedCount(): number {
-    return this.tasksForDay.filter((t) => t.completed).length;
-  }
+  completedCount = computed(() => this.tasksForDay().filter((t) => t.completed).length);
 
   ngOnInit() {
     this.unsubAuth = onAuthStateChanged(auth, (user) => {
-      this.currentUser = user;
+      this.currentUser.set(user);
       if (user) {
-        this.subscribeToTasks(user.uid);
+        this.selectedDate.set(this.toDateStr(new Date()));
+        this.groupService.loadGroups().then(() => {
+          this.subscribeToTasks(user.uid);
+        });
       } else {
         this.unsubTasks?.();
-        this.tasks = [];
-        this.loading = false;
+        this.tasks.set([]);
+        this.loading.set(false);
       }
     });
   }
@@ -172,46 +173,50 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private subscribeToTasks(uid: string) {
-    this.loading = true;
+    this.loading.set(true);
     const q = query(collection(database, 'tasks'));
     this.unsubTasks = onSnapshot(q, (snapshot) => {
-      this.tasks = snapshot.docs
-        .map((d) => ({ id: d.id, ...(d.data() as Omit<Task, 'id'>) }))
-        .filter(
-          (task) =>
-            task.userId == uid ||
-            this.groupService
-              .getGroupByID(task.groupID)
-              ?.memberEmails.includes(this.currentUser?.email!),
-        );
-      this.loading = false;
+      this.tasks.set(
+        snapshot.docs
+          .map((d) => ({ id: d.id, ...(d.data() as Omit<Task, 'id'>) }))
+          .filter(
+            (task) =>
+              task.userId == uid ||
+              this.groupService
+                .getGroupByID(task.groupID)
+                ?.memberEmails.includes(this.currentUser()?.email!),
+          ),
+      );
+      this.loading.set(false);
     });
   }
 
   prevMonth() {
-    this.viewDate = new Date(this.viewDate.getFullYear(), this.viewDate.getMonth() - 1, 1);
+    const v = this.viewDate();
+    this.viewDate.set(new Date(v.getFullYear(), v.getMonth() - 1, 1));
   }
 
   nextMonth() {
-    this.viewDate = new Date(this.viewDate.getFullYear(), this.viewDate.getMonth() + 1, 1);
+    const v = this.viewDate();
+    this.viewDate.set(new Date(v.getFullYear(), v.getMonth() + 1, 1));
   }
 
   goToday() {
-    this.viewDate = new Date();
-    this.selectedDate = this.toDateStr(new Date());
+    this.viewDate.set(new Date());
+    this.selectedDate.set(this.toDateStr(new Date()));
   }
 
   selectDay(day: CalDay) {
-    if (day.inMonth) this.selectedDate = day.dateStr;
+    if (day.inMonth) this.selectedDate.set(day.dateStr);
   }
 
   async addTask() {
     const title = this.newTaskTitle.trim();
-    if (!title || !this.currentUser) return;
+    if (!title || !this.currentUser()) return;
 
     await addDoc(collection(database, 'tasks'), {
       title,
-      date: this.selectedDate,
+      date: this.selectedDate(),
       time: this.newTaskTime
         ? {
             hour: Number(this.newTaskTime.split(':')[0]),
@@ -219,7 +224,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
           }
         : null,
       completed: false,
-      userId: this.currentUser.uid,
+      userId: this.currentUser()!.uid,
       category: this.newTaskCategory,
       groupID: this.newTaskGroup(),
     });
@@ -233,13 +238,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   async deleteTask(task: Task) {
-    if (task.userId == this.currentUser?.uid) {
+    if (task.userId == this.currentUser()?.uid) {
       await deleteDoc(doc(database, 'tasks', task.id));
     }
   }
 
   hasTask(dateStr: string): boolean {
-    return this.tasks.some((t) => t.date === dateStr);
+    return this.tasks().some((t) => t.date === dateStr);
   }
 
   isToday(dateStr: string): boolean {
@@ -247,7 +252,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   toDateStr(d: Date): string {
-    return d.toISOString().slice(0, 10);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
   formatTaskTime(time?: { hour: number; minute: number }): string {

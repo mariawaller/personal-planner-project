@@ -21,7 +21,7 @@
           class="cal-day"
           [class.other-month]="!day.inMonth"
           [class.is-today]="isToday(day.dateStr)"
-          [class.is-selected]="day.dateStr === selectedDate"
+          [class.is-selected]="day.dateStr === selectedDate()"
           (click)="selectDay(day)"
         >
           {{ day.dayNum }}
@@ -34,23 +34,23 @@
   </mat-card>
 
   <div class="tasks-panel">
-    @if (!currentUser && !loading) {
+    @if (!currentUser() && !loading()) {
       <div class="empty">
         <mat-icon>lock</mat-icon>
         <p>Please log in to see your tasks.</p>
       </div>
     }
 
-    @if (loading) {
+    @if (loading()) {
       <div class="empty">
         <mat-spinner diameter="40"></mat-spinner>
         <p>Loading tasks…</p>
       </div>
     }
 
-    @if (currentUser && !loading) {
+    @if (currentUser() && !loading()) {
       <h2 class="date-heading">{{ selectedDateLabel }}</h2>
-      <p class="task-count">{{ completedCount }} / {{ tasksForDay.length }} done</p>
+      <p class="task-count">{{ completedCount() }} / {{ tasksForDay().length }} done</p>
 
       <div class="add-task-row">
         <mat-form-field appearance="outline" class="task-input">
@@ -80,32 +80,32 @@
       <div class="filter-chips">
         <button
           class="filter-chip"
-          [class.active]="filterCategory === 'all'"
-          (click)="filterCategory = 'all'"
+          [class.active]="filterCategory() === 'all'"
+          (click)="filterCategory.set('all')"
         >
           All
         </button>
         @for (cat of categories; track cat.value) {
           <button
             class="filter-chip"
-            [class.active]="filterCategory === cat.value"
+            [class.active]="filterCategory() === cat.value"
             [style.--chip-color]="cat.color"
             [matTooltip]="cat.label"
-            (click)="filterCategory = cat.value"
+            (click)="filterCategory.set(cat.value)"
           >
             <mat-icon>{{ cat.icon }}</mat-icon>
           </button>
         }
       </div>
 
-      @if (tasksForDay.length === 0) {
+      @if (tasksForDay().length === 0) {
         <div class="empty">
           <mat-icon>event_available</mat-icon>
           <p>No tasks for this day</p>
         </div>
       }
 
-      @for (task of tasksForDay; track task.id) {
+      @for (task of tasksForDay(); track task.id) {
         @let cat = categories[categories.findIndex((c) => c.value === task.category)];
         <mat-card
           class="task-card"
