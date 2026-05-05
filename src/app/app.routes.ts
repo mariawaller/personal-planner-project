@@ -6,12 +6,12 @@ import { RegisterPageComponent } from '../components/register-page-component/reg
 
 export const routes: Routes = [
   {
-    path: 'login',
+    path: '',
     component: LoginPageComponent,
     title: 'Login',
   },
   {
-    path: '',
+    path: 'dashboard',
     component: DashboardComponent,
     title: 'Dashboard',
   },
