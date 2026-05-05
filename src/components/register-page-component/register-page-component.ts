@@ -53,7 +53,7 @@ export class RegisterPageComponent {
     this.loading = true;
     try {
       await createUserWithEmailAndPassword(auth, this.email, this.password);
-      this.router.navigate(['/login']);
+      this.router.navigate(['/dashboard']);
     } catch (error: any) {
       switch (error.code) {
         case 'auth/email-already-in-use':
